@@ -49,7 +49,10 @@ resource "aws_instance" "jenkins_host" {
   instance_type="t2.large"
   subnet_id = "${module.i411.subnet[module.i411.environment]}"
   key_name = "${module.i411.key_name[module.i411.environment]}"
-  
+
+  root_block_device {
+    volume_size = 20 
+  }
 }
 
 resource "aws_ebs_volume" "jenkins_data_volume" {
