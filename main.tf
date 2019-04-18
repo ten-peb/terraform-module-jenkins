@@ -14,24 +14,24 @@ provider "aws" {
 resource "aws_security_group" "ports_for_jenkins" {
   name        = "Jenkins 22/80/8080"
   description = "Allow traffic for Jenkins"
-
+  vpc_id = "${module.i411.default_vpc[var.environment]}"
   ingress {
     from_port   = 80
     to_port     = 80
-    protocol    = "-1"
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
   ingress {
     from_port   = 22
     to_port     = 22
-    protocol    = "-1"
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
   ingress {
     # TLS (change to whatever ports you need)
     from_port   = 8080
     to_port     = 8080
-    protocol    = "-1"
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -52,6 +52,32 @@ resource "aws_instance" "jenkins_host" {
 
   root_block_device {
     volume_size = 20 
+  }
+
+
+  tags {
+    "Name" = "jenkins-s1-${var.environment}"
+  }
+  security_groups = ["${aws_security_group.ports_for_jenkins.id}"]
+
+  provisioner "remote-exec" {
+    inline = [
+      "mkdir -vp /opt/bin",
+      "mkdir -vp /opt/syssetup"
+    ]
+  }
+  provisioner "file" {
+    source = "files/bin/finish-script.sh",
+    destination = "/opt/bin"
+  }
+  provisioner "file" {
+    source = "files/syssetup/",
+    destination = "/opt/"
+  }
+  provisioner "remote-exec" {
+    inline = [
+      "/opt/bin/finish-script.sh"
+    ]
   }
 }
 
