@@ -78,10 +78,11 @@ resource "aws_instance" "jenkins_host" {
   }
   provisioner "remote-exec" {
     inline = [
-      "sudo mkdir -vp /opt/bin",
-      "sudo mkdir -vp /opt/syssetup",
+      "sudo mkdir -vp /opt/{atjobs,bin,puppet-manifests,syssetup}"
       "sudo chown ubuntu /opt/bin",
-      "sudo chown ubuntu /opt/syssetup"
+      "sudo chown ubuntu /opt/syssetup",
+      "sudo chown ubuntu /opt/puppet-manifests",
+      "sudo chown ubuntu /opt/atjobs"
     ]
   }
   provisioner "file" {
@@ -96,6 +97,16 @@ resource "aws_instance" "jenkins_host" {
   provisioner "file" {
     source = "scripts/syssetup/",
     destination = "/opt/syssetup/"
+  
+ }
+  provisioner "file" {
+    source = "scripts/puppet-manifests/",
+    destination = "/opt/puppet-manifests/"
+  
+ }
+  provisioner "file" {
+    source = "scripts/atjobs/",
+    destination = "/opt/atjobs/"
   
  }
   provisioner "remote-exec" {
