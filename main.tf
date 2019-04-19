@@ -43,6 +43,17 @@ resource "aws_security_group" "ports_for_jenkins" {
   }
   revoke_rules_on_delete = "true"
 }
+resource "aws_ebs_volume" "jenkins_data_volume" {
+  size = 80
+  availability_zone = "${aws_instance.jenkins_host.availability_zone}"
+}
+
+resource "aws_volume_attachment" "jenkins_ebs" {
+  device_name = "/dev/sdd"
+  volume_id = "${aws_ebs_volume.jenkins_data_volume.id}"
+  instance_id = "${aws_instance.jenkins_host.id}"
+
+}
 
 resource "aws_instance" "jenkins_host" {
   ami = "${module.i411.ami["ubuntu"]}"
@@ -60,35 +71,37 @@ resource "aws_instance" "jenkins_host" {
   }
   security_groups = ["${aws_security_group.ports_for_jenkins.id}"]
 
-  provisioner "remote-exec" {
-    inline = [
-      "mkdir -vp /opt/bin",
-      "mkdir -vp /opt/syssetup"
-    ]
-  }
-  provisioner "file" {
-    source = "files/bin/finish-script.sh",
-    destination = "/opt/bin"
-  }
-  provisioner "file" {
-    source = "files/syssetup/",
-    destination = "/opt/"
+
+  connection {
+    user = "ubuntu" ,
+    private_key = "${file("/data/home/peter/.ssh/s1-dv1.pem")}"
   }
   provisioner "remote-exec" {
     inline = [
-      "/opt/bin/finish-script.sh"
+      "sudo mkdir -vp /opt/bin",
+      "sudo mkdir -vp /opt/syssetup",
+      "sudo chown ubuntu /opt/bin",
+      "sudo chown ubuntu /opt/syssetup"
+    ]
+  }
+  provisioner "file" {
+    source = "scripts/bin/",
+    destination = "/opt/bin/"
+  }
+  provisioner "remote-exec" {
+     inline = [
+        "sudo chmod 755 /opt/bin/*.sh"
+     ]
+  }
+  provisioner "file" {
+    source = "scripts/syssetup/",
+    destination = "/opt/syssetup/"
+  
+ }
+  provisioner "remote-exec" {
+    inline = [
+      "sudo /opt/bin/finish-script.sh"
     ]
   }
 }
 
-resource "aws_ebs_volume" "jenkins_data_volume" {
-  size = 80
-  availability_zone = "${aws_instance.jenkins_host.availability_zone}"
-}
-
-resource "aws_volume_attachment" "jenkins_ebs" {
-  device_name = "/dev/sdd"
-  volume_id = "${aws_ebs_volume.jenkins_data_volume.id}"
-  instance_id = "${aws_instance.jenkins_host.id}"
-
-}
