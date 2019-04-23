@@ -20,8 +20,7 @@ echo "
 10.133.2.100 puppetdb puppetdb.dv1.tenna.com
 " >> /etc/hosts
 
-echo "
-#!/bin/bash
+echo "#!/bin/bash
 
 echo 'host_function=jenkins_host'
 
@@ -30,7 +29,7 @@ exit 0
 chmod 755 /opt/puppetlabs/facter/facts.d/hostfunction.sh
 
 /opt/puppetlabs/bin/puppet agent -t --waitforcert=1
-/opt/puppetlabs/bin/puppet -e 'service{"puppet":ensure =>running,enable=true}"
+/opt/puppetlabs/bin/puppet -e 'service{"puppet":ensure =>running,enable=true}"'
 
 
 exit 0
