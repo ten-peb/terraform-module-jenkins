@@ -23,9 +23,6 @@ file{'/data/ci/jenkins':
   require => User['jenkins']
 }
 
-group{'peter':
-  ensure => present
-}
 user{'peter':
   ensure => present,
   gid => 'peter',

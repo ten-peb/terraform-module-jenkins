@@ -78,7 +78,11 @@ resource "aws_instance" "jenkins_host" {
   }
   provisioner "remote-exec" {
     inline = [
-      "sudo mkdir -vp /opt/{atjobs,bin,puppet-manifests,syssetup}"
+      "sudo mkdir -vp /opt/atjobs",
+      "sudo mkdir -vp /opt/bin",
+      "sudo mkdir -vp /opt/puppet-manifests",
+      "sudo mkdir -vp /opt/syssetup",
+      "sudo mkdir /var/log/provision",
       "sudo chown ubuntu /opt/bin",
       "sudo chown ubuntu /opt/syssetup",
       "sudo chown ubuntu /opt/puppet-manifests",
